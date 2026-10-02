@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Browser MCP</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+      body {
+        width: 240px;
+        margin: 0;
+        padding: 16px;
+        text-align: center;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0 0 12px;
+      }
+      #status {
+        font-size: 13px;
+        margin: 0 0 12px;
+      }
+      #status.ok { color: #16a34a; }
+      #status.pending { color: #d97706; }
+      #status.off { color: #6b7280; }
+      button {
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 13px;
+        border: 0;
+        border-radius: 6px;
+        background: #2563eb;
+        color: #fff;
+        cursor: pointer;
+      }
+      button:hover { background: #1d4ed8; }
+    </style>
+  </head>
+  <body>
+    <h1>Browser MCP</h1>
+    <p id="status" class="off">Not connected</p>
+    <button id="toggle">Connect</button>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
