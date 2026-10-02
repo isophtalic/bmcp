@@ -15,8 +15,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/ngxuanth/mcp-server/internal/browser"
 	"github.com/ngxuanth/mcp-server/internal/bridge"
+	"github.com/ngxuanth/mcp-server/internal/browser"
 	"github.com/ngxuanth/mcp-server/internal/config"
 	"github.com/ngxuanth/mcp-server/internal/mcp"
 	"github.com/ngxuanth/mcp-server/internal/tools"
@@ -57,7 +57,7 @@ func main() {
 		}()
 	}
 
-	server := mcp.NewServer(cfg.Name, cfg.Version, tools.All(hub))
+	server := mcp.NewServer(cfg.Name, cfg.Version, cfg.MCPVersion, tools.All(hub))
 	if err := server.Serve(ctx); err != nil {
 		log.Fatalf("mcp server: %v", err)
 	}

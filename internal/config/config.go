@@ -1,13 +1,17 @@
 // Package config reads the server's settings from environment variables and
 // command-line flags. The names mirror the Node implementation so existing
-// setups keep working (BMCP_WS_PORT, BMCP_EXTENSION_ID, BMCP_NO_KILL).
+// setups keep working (BMCP_WS_PORT, BMCP_EXTENSION_ID, BMCP_NO_KILL,
+// BMCP_MCP_VERSION).
 package config
 
 import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
+
+	"github.com/ngxuanth/mcp-server/internal/mcp"
 )
 
 const DefaultWsPort = 9009
@@ -17,6 +21,10 @@ type Config struct {
 	// Name and Version are reported to the MCP client.
 	Name    string
 	Version string
+
+	// MCPVersion is the MCP protocol revision the server prefers; it must be one
+	// of mcp.SupportedProtocolVersions. A client may still pin the other one.
+	MCPVersion string
 
 	// WsPort is the loopback port the Chrome extension connects to.
 	WsPort int
@@ -50,6 +58,7 @@ func Load(version string) (Config, error) {
 	cfg := Config{
 		Name:         "Browser MCP",
 		Version:      version,
+		MCPVersion:   env("BMCP_MCP_VERSION", mcp.ProtocolV20250618),
 		ExtensionID:  os.Getenv("BMCP_EXTENSION_ID"),
 		NoKill:       os.Getenv("BMCP_NO_KILL") != "",
 		Launch:       os.Getenv("BMCP_LAUNCH"),
@@ -74,6 +83,7 @@ func Load(version string) (Config, error) {
 	fs.StringVar(&cfg.Launch, "launch", cfg.Launch, `launch and auto-connect a browser on boot; only "chrome" is supported (default: off)`)
 	fs.StringVar(&cfg.ExtensionDir, "extension-dir", cfg.ExtensionDir, "unpacked extension directory (required with --launch)")
 	fs.StringVar(&cfg.StartURL, "start-url", cfg.StartURL, "page opened in the connected tab when --launch is used")
+	fs.StringVar(&cfg.MCPVersion, "mcp-version", cfg.MCPVersion, fmt.Sprintf("MCP protocol revision to prefer: %q or %q", mcp.ProtocolV20250618, mcp.ProtocolV20260728))
 	if err := fs.Parse(os.Args[1:]); err != nil {
 		return Config{}, err
 	}
@@ -85,6 +95,10 @@ func Load(version string) (Config, error) {
 
 	if cfg.Launch != "" && cfg.Launch != "chrome" {
 		return Config{}, fmt.Errorf("unsupported --launch %q: only \"chrome\" is supported", cfg.Launch)
+	}
+
+	if !slices.Contains(mcp.SupportedProtocolVersions, cfg.MCPVersion) {
+		return Config{}, fmt.Errorf("unsupported --mcp-version %q: supported versions are %v", cfg.MCPVersion, mcp.SupportedProtocolVersions)
 	}
 
 	return cfg, nil
